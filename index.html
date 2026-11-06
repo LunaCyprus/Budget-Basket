@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f3f1fa" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0d0b16" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Basket">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" href="icons/icon-192.png">
+<title>Budget Basket</title>
+<style>
+:root{
+  --bg:#f3f1fa; --solid:#ffffff; --glass:rgba(255,255,255,.72); --glass-strong:rgba(255,255,255,.86);
+  --ink:#1b1630; --muted:#7b7494; --line:rgba(60,45,120,.09);
+  --accent:#6a5cff; --accent-2:#c25cff; --accent-3:#ff7a9c;
+  --grad:linear-gradient(135deg,#5b5cff 0%,#a35cff 48%,#ff7a9c 100%);
+  --grad-soft:linear-gradient(135deg,rgba(91,92,255,.12),rgba(255,122,156,.12));
+  --shadow:0 1px 1px rgba(40,30,90,.04),0 2px 6px rgba(40,30,90,.05),0 12px 28px -10px rgba(70,50,160,.18);
+  --shadow-pop:0 18px 40px -14px rgba(106,92,255,.6),0 6px 14px -6px rgba(255,122,156,.45);
+  --good:#16a37a; --warn:#d97706; --bad:#e5394f; --r:22px;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0d0b16; --solid:#1b1828; --glass:rgba(32,28,48,.66); --glass-strong:rgba(36,32,54,.88);
+  --ink:#f2effc; --muted:#a39cbe; --line:rgba(255,255,255,.08);
+  --grad-soft:linear-gradient(135deg,rgba(120,110,255,.2),rgba(255,122,156,.16));
+  --shadow:0 1px 1px rgba(0,0,0,.3),0 14px 30px -12px rgba(0,0,0,.6);
+  --good:#34d399; --warn:#fbbf24; --bad:#fb7185; --accent:#9d93ff;
+}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{background:var(--bg)}
+body{margin:0;min-height:100vh;color:var(--ink);font:16px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased;background:var(--bg)}
+/* soft colour blobs behind everything */
+body::before{content:"";position:fixed;inset:-20% -20% auto -20%;height:70vh;z-index:-1;pointer-events:none;
+  background:radial-gradient(40% 45% at 15% 25%,rgba(106,92,255,.28),transparent 70%),
+             radial-gradient(35% 40% at 85% 10%,rgba(255,122,156,.26),transparent 70%),
+             radial-gradient(40% 40% at 60% 60%,rgba(194,92,255,.16),transparent 70%);filter:blur(10px)}
+header{position:sticky;top:0;z-index:5;padding:calc(env(safe-area-inset-top) + 14px) 20px 10px;max-width:640px;margin:0 auto;
+  display:flex;align-items:flex-end;justify-content:space-between;gap:8px;
+  background:linear-gradient(var(--bg) 55%,transparent);}
+.eyebrow{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
+h1{font-size:34px;line-height:1.05;margin:0;letter-spacing:-.025em;font-weight:800}
+h2{font-size:22px;margin:0 0 12px;letter-spacing:-.02em}
+h3{font-size:13px;margin:0 0 10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+main{padding:4px 16px calc(120px + env(safe-area-inset-bottom));max-width:640px;margin:0 auto}
+.pill{font-size:12px;padding:6px 11px;border-radius:99px;background:var(--glass);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  color:var(--good);font-weight:600;white-space:nowrap;box-shadow:var(--shadow);margin-bottom:4px}
+.pill::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:currentColor;margin-right:6px;vertical-align:1px}
+.pill.off{color:var(--warn)}
+input,select,button{font:inherit;color:inherit}
+input,select{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:14px;background:var(--solid);font-size:16px;-webkit-appearance:none;appearance:none;box-shadow:inset 0 1px 2px rgba(40,30,90,.04);transition:box-shadow .2s,border-color .2s}
+select{background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;background-size:5px 5px;background-repeat:no-repeat;padding-right:32px}
+input:focus,select:focus{outline:0;border-color:var(--accent);box-shadow:0 0 0 4px rgba(106,92,255,.18)}
+label{display:block;font-size:14px;color:var(--muted);margin:12px 0 6px;font-weight:500}
+button{cursor:pointer;transition:transform .12s ease,opacity .12s}
+button:active{transform:scale(.96)}
+.btn{background:var(--grad);color:#fff;border:0;border-radius:14px;padding:13px 18px;font-weight:700;white-space:nowrap;box-shadow:var(--shadow-pop);letter-spacing:.01em}
+.ghost{background:var(--glass);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:14px;padding:11px 16px;font-weight:600;box-shadow:var(--shadow)}
+.danger{color:var(--bad)}
+.link{background:none;border:0;color:var(--accent);padding:6px 0;font-weight:700}
+.card{background:var(--glass);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%);
+  border:1px solid rgba(255,255,255,.5);border-radius:var(--r);padding:16px;margin:14px 0;box-shadow:var(--shadow)}
+@media (prefers-color-scheme:dark){.card{border-color:var(--line)}}
+.row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:5px 0}
+.row b{font-variant-numeric:tabular-nums;text-align:right}
+.big b{font-size:34px;letter-spacing:-.03em;font-weight:800}
+.muted{color:var(--muted)}.small{font-size:13px}.center{text-align:center}
+.warn{color:var(--warn)}.bad{color:var(--bad)}.good{color:var(--good)}
+
+/* store picker: horizontal chips */
+.chiprow{display:flex;gap:8px;overflow-x:auto;padding:4px 16px 8px;margin:0 -16px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.chiprow::-webkit-scrollbar{display:none}
+.schip{flex:none;border:0;border-radius:99px;padding:9px 16px;font-weight:600;font-size:15px;background:var(--glass);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:var(--shadow);color:var(--ink)}
+.schip.on{background:var(--grad);color:#fff;box-shadow:var(--shadow-pop)}
+
+/* hero total card */
+.hero{position:relative;overflow:hidden;background:var(--grad);color:#fff;border:0;border-radius:28px;padding:20px;box-shadow:var(--shadow-pop)}
+.hero::before{content:"";position:absolute;width:260px;height:260px;right:-80px;top:-120px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.35),transparent 65%)}
+.hero::after{content:"";position:absolute;width:200px;height:200px;left:-60px;bottom:-110px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.18),transparent 70%)}
+.hero>*{position:relative}
+.hero .muted,.hero .row span{color:rgba(255,255,255,.85)}
+.hero .warn,.hero .bad,.hero .good{color:#fff}
+.hero .link{color:#fff;text-decoration:underline;text-underline-offset:3px}
+.hero .note{display:inline-block;margin-top:6px;font-size:13px;background:rgba(255,255,255,.2);padding:4px 10px;border-radius:99px}
+.bar{height:10px;border-radius:99px;background:rgba(255,255,255,.25);overflow:hidden;margin:14px 0 6px}
+.bar>div{height:100%;background:#fff;border-radius:99px;box-shadow:0 0 12px rgba(255,255,255,.8);transition:width .4s cubic-bezier(.2,.8,.2,1)}
+.bar.near>div{background:#ffe27a}.bar.over>div{background:#ff3b5c;box-shadow:0 0 14px rgba(255,59,92,.9)}
+.status{font-weight:700;background:rgba(255,255,255,.22);padding:3px 10px;border-radius:99px;color:#fff!important}
+
+form.add{display:flex;gap:8px;margin:16px 0 12px;padding:6px;border-radius:20px;background:var(--glass);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);box-shadow:var(--shadow)}
+form.add input{border:0;background:transparent;box-shadow:none}
+form.add input:focus{box-shadow:none}
+form.add input.qty{width:64px;flex:none;text-align:center;background:var(--grad-soft);border-radius:14px}
+ul.list{list-style:none;margin:0;padding:0;background:var(--glass);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow)}
+ul.list li{position:relative;display:flex;align-items:center;gap:12px;padding:12px 14px;animation:rowIn .25s ease both}
+ul.list li+li::before{content:"";position:absolute;top:0;left:54px;right:0;height:1px;background:var(--line)}
+@keyframes rowIn{from{opacity:0;transform:translateY(4px)}}
+ul.list li.done .name{text-decoration:line-through;color:var(--muted)}
+ul.list li.done .price{opacity:.5}
+.check{width:28px;height:28px;flex:none;border-radius:50%;border:2px solid rgba(123,116,148,.45);background:none;color:#fff;font-weight:800;font-size:14px;padding:0;transition:all .2s}
+li.done .check{background:var(--grad);border-color:transparent;box-shadow:0 4px 10px -3px rgba(106,92,255,.7);animation:pop .3s ease}
+@keyframes pop{50%{transform:scale(1.2)}}
+.info{flex:1;min-width:0}
+.name{font-weight:650;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;letter-spacing:-.01em}
+.sub{font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tip{color:var(--good);font-weight:600}
+.sub.tip{white-space:normal}
+.qtybox{display:flex;align-items:center;background:var(--grad-soft);border-radius:99px;flex:none}
+.qtybox button{background:none;border:0;width:30px;height:30px;font-size:18px;color:var(--accent);font-weight:700}
+.qtybox span{min-width:26px;text-align:center;font-variant-numeric:tabular-nums;font-size:14px;font-weight:600}
+.price{background:none;border:0;font-weight:750;font-weight:700;font-variant-numeric:tabular-nums;min-width:70px;text-align:right;padding:6px 0}
+.price.none{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+.badge{font-size:10px;background:var(--grad);color:#fff;padding:3px 8px;border-radius:99px;font-weight:800;letter-spacing:.05em;vertical-align:2px;box-shadow:0 4px 10px -4px rgba(106,92,255,.8)}
+.row.cur span:first-child{font-weight:700}
+.row.split{border-top:1px dashed var(--line);margin-top:8px;padding-top:10px}
+.toolbar{display:flex;gap:8px;margin:4px 0 14px}
+.item{display:block;width:100%;text-align:left;background:var(--glass);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border:0;border-radius:var(--r);padding:14px 16px;margin:0 0 10px;box-shadow:var(--shadow)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{font-size:13px;background:var(--solid);border:1px solid var(--line);border-radius:99px;padding:4px 10px;font-variant-numeric:tabular-nums}
+.chip.best{background:var(--grad-soft);border-color:transparent;color:var(--accent);font-weight:700}
+.up{color:var(--bad)}.down{color:var(--good)}
+.prow{display:grid;grid-template-columns:1fr 130px;gap:8px;align-items:center;margin:8px 0}
+.prow .s{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+.prow .d{grid-column:1/-1;font-size:12px;color:var(--muted);margin-top:-4px}
+.hist{font-size:13px;color:var(--muted);margin:4px 0 0;padding-left:18px}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.btns .btn{flex:1}
+.empty{text-align:center;padding:48px 16px}
+.empty .orb{width:84px;height:84px;margin:0 auto 18px;border-radius:28px;background:var(--grad);box-shadow:var(--shadow-pop);display:grid;place-items:center}
+.empty .orb svg{width:44px;height:44px;fill:none;stroke:#fff;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.empty p{color:var(--muted);max-width:300px;margin:0 auto 20px}
+
+/* floating glass tab bar */
+.tabbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 10px);width:calc(100% - 28px);max-width:460px;display:flex;gap:4px;padding:6px;
+  background:var(--glass-strong);-webkit-backdrop-filter:blur(24px) saturate(180%);backdrop-filter:blur(24px) saturate(180%);
+  border:1px solid rgba(255,255,255,.55);border-radius:30px;box-shadow:0 10px 30px -8px rgba(50,35,120,.35),0 2px 6px rgba(50,35,120,.08);z-index:6}
+@media (prefers-color-scheme:dark){.tabbar{border-color:var(--line)}}
+.tabbar button{flex:1;background:none;border:0;border-radius:24px;padding:8px 0 6px;color:var(--muted);font-size:11px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:2px;transition:background .25s,color .25s}
+.tabbar button.on{color:var(--accent);background:var(--grad-soft)}
+.tabbar svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+
+/* iOS-style bottom sheet */
+#sheet{position:fixed;inset:0;z-index:20}
+#sheet[hidden]{display:none}
+.backdrop{position:absolute;inset:0;background:rgba(20,12,45,.35);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);animation:fade .2s ease}
+.panel{position:absolute;left:0;right:0;bottom:0;max-height:90vh;overflow:auto;background:var(--bg);border-radius:30px 30px 0 0;padding:10px 18px calc(22px + env(safe-area-inset-bottom));max-width:640px;margin:0 auto;box-shadow:0 -10px 40px rgba(30,20,80,.25);animation:up .32s cubic-bezier(.2,.9,.25,1)}
+.grabber{width:38px;height:5px;border-radius:99px;background:rgba(123,116,148,.4);margin:0 auto 14px}
+@keyframes up{from{transform:translateY(100%)}}
+@keyframes fade{from{opacity:0}}
+#toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translate(-50%,8px);background:rgba(27,22,48,.88);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:#fff;padding:11px 18px;border-radius:99px;font-size:14px;font-weight:600;z-index:30;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;white-space:nowrap;box-shadow:0 10px 30px -10px rgba(0,0,0,.5)}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+<header><div><div class="eyebrow" id="eyebrow"></div><h1 id="title">List</h1></div><span id="net" class="pill"></span></header>
+<main id="main"></main>
+<nav class="tabbar">
+  <button data-tab="list" onclick="go('list')"><svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></svg>List</button>
+  <button data-tab="prices" onclick="go('prices')"><svg viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.5"/></svg>Prices</button>
+  <button data-tab="stores" onclick="go('stores')"><svg viewBox="0 0 24 24"><path d="M4 10v10h16V10M3 10l2-6h14l2 6zM9 20v-6h6v6"/></svg>Stores</button>
+  <button data-tab="settings" onclick="go('settings')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9 7 7M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/></svg>Settings</button>
+</nav>
+<div id="sheet" hidden></div>
+<div id="toast"></div>
+
+<script>
+'use strict';
+/* ---------------- data ---------------- */
+const KEY = 'budgetbasket.v1';
+const UNITS = ['pc','kg','g','L','mL','pack','dozen','bottle','can','sachet','box','tray','bundle'];
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const money = n => '₱' + Number(n).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+const today = () => { const d = new Date(); return new Date(d - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 10); };
+const niceDate = d => d ? new Date(d + 'T00:00').toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'}) : '';
+const num = v => { const n = parseFloat(String(v).replace(',', '.')); return isFinite(n) ? n : null; };
+const fmtQty = q => String(Math.round(q * 100) / 100);
+
+function blank() { return {v: 1, stores: [], items: [], list: [], settings: {budget: 0, store: null, lastBackup: null}}; }
+function load() {
+  try {
+    const d = JSON.parse(localStorage.getItem(KEY));
+    if (d && Array.isArray(d.items)) { const b = blank(); return {...b, ...d, settings: {...b.settings, ...(d.settings || {})}}; }
+  } catch (e) {}
+  return blank();
+}
+let S = load();
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(S)); }
+  catch (e) { toast('Could not save — phone storage may be full'); }
+}
+
+const getItem = id => S.items.find(i => i.id === id);
+const getStore = id => S.stores.find(s => s.id === id);
+const priceAt = (it, sid) => (it.prices && it.prices[sid]) ? it.prices[sid].p : null;
+
+function setPrice(it, sid, val) {
+  it.prices = it.prices || {};
+  const cur = it.prices[sid];
+  if (val === null) { delete it.prices[sid]; return; }
+  val = Math.round(val * 100) / 100;
+  if (cur && cur.p === val) return;
+  const h = cur ? (cur.h || []).concat([{p: cur.p, d: cur.d}]) : [];
+  it.prices[sid] = {p: val, d: today(), h: h.slice(-20)};
+}
+function cheapest(it) {
+  let best = null;
+  for (const s of S.stores) { const p = priceAt(it, s.id); if (p != null && (!best || p < best.p)) best = {p, sid: s.id}; }
+  return best;
+}
+function activeStore() {
+  if (!getStore(S.settings.store)) S.settings.store = S.stores[0] ? S.stores[0].id : null;
+  return S.settings.store;
+}
+function totalsAt(sid) {
+  let total = 0, cart = 0, missing = 0;
+  for (const l of S.list) {
+    const it = getItem(l.itemId); if (!it) continue;
+    const p = priceAt(it, sid);
+    if (p == null) { missing++; continue; }
+    total += p * l.qty; if (l.done) cart += p * l.qty;
+  }
+  return {total, cart, missing};
+}
+const stepFor = it => ['kg', 'L'].includes(it.unit) ? 0.25 : ['g', 'mL'].includes(it.unit) ? 100 : 1;
+
+/* ---------------- ui helpers ---------------- */
+let tab = 'list', query = '';
+const TITLES = {list: 'List', prices: 'Prices', stores: 'Stores', settings: 'Settings'};
+
+function render() {
+  $('#title').textContent = TITLES[tab];
+  $('#eyebrow').textContent = new Date().toLocaleDateString('en-US', {weekday: 'long', month: 'short', day: 'numeric'});
+  const net = $('#net');
+  net.textContent = navigator.onLine ? 'Saved on this phone' : 'Offline — still works';
+  net.className = 'pill' + (navigator.onLine ? '' : ' off');
+  $('#main').innerHTML = VIEWS[tab]();
+  document.querySelectorAll('.tabbar button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
+}
+function go(t) { tab = t; closeSheet(); render(); window.scrollTo(0, 0); }
+function sheet(html) {
+  const el = $('#sheet');
+  el.innerHTML = `<div class="backdrop" onclick="closeSheet()"></div><div class="panel" role="dialog"><div class="grabber"></div>${html}</div>`;
+  el.hidden = false;
+  const f = el.querySelector('[data-focus]'); if (f) setTimeout(() => { f.focus(); if (f.select) f.select(); }, 60);
+}
+function closeSheet() { const el = $('#sheet'); el.hidden = true; el.innerHTML = ''; }
+let toastT;
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2200); }
+function empty(title, text, btn, action) {
+  return `<div class="empty"><div class="orb"><svg viewBox="0 0 24 24"><path d="M3 9h18l-2 11H5z"/><path d="M8 9l4-6 4 6M9 13v4M12 13v4M15 13v4"/></svg></div><h2>${title}</h2><p>${text}</p><button class="btn" onclick="${action}">${btn}</button></div>`;
+}
+
+/* ---------------- LIST view ---------------- */
+function viewList() {
+  if (!S.stores.length) return empty('Start by adding a store', 'A store is anywhere you buy groceries — a supermarket, a market stall, a convenience store.', 'Add a store', "go('stores')");
+  const sid = activeStore();
+  const t = totalsAt(sid), b = S.settings.budget;
+  let h = `<h3 style="margin:2px 0 6px">Shopping at</h3><div class="chiprow">${S.stores.map(s => `<button class="schip ${s.id === sid ? 'on' : ''}" onclick="S.settings.store='${s.id}';save();render()">${esc(s.name)}</button>`).join('')}</div>`;
+
+  h += `<div class="card hero"><div class="row big"><span>List total</span><b id="listTotal">${money(t.total)}</b></div>
+    <div class="row"><span class="muted">In cart (checked)</span><b>${money(t.cart)}</b></div>
+    ${t.missing ? `<div class="note">⚠︎ ${t.missing} item${t.missing > 1 ? 's have' : ' has'} no price at this store yet</div>` : ''}
+    ${b > 0 ? budgetBar(t.total, b) : `<button class="link" onclick="go('settings')">+ Set a budget</button>`}</div>`;
+
+  h += `<form class="add" onsubmit="addToList(event)">
+    <input id="addName" list="itemNames" placeholder="Add item, e.g. Rice" autocomplete="off" enterkeyhint="done">
+    <input id="addQty" class="qty" type="number" inputmode="decimal" min="0" step="any" value="1" aria-label="Quantity">
+    <button class="btn">Add</button></form>
+    <datalist id="itemNames">${S.items.map(i => `<option value="${esc(i.name)}">`).join('')}</datalist>`;
+
+  if (!S.list.length) h += `<p class="muted center">Your list is empty. Add what you need above.</p>`;
+  else {
+    const rows = [...S.list].sort((a, b) => a.done - b.done);
+    h += `<ul class="list">${rows.map(l => listRow(l, sid)).join('')}</ul>
+      <div class="actions"><button class="ghost" onclick="uncheckAll()">Uncheck all</button><button class="ghost" onclick="clearDone()">Remove checked</button></div>`;
+  }
+  if (S.list.length && S.stores.length > 1) h += compareCard(sid);
+  return h;
+}
+function budgetBar(total, b) {
+  const pct = Math.min(100, total / b * 100), left = b - total;
+  const cls = total > b ? 'over' : pct >= 85 ? 'near' : '';
+  return `<div class="bar ${cls}"><div style="width:${pct}%"></div></div>
+    <div class="row small"><span>Budget ${money(b)}</span>
+    <span class="status">${total > b ? money(-left) + ' over budget' : money(left) + ' left'}</span></div>`;
+}
+function listRow(l, sid) {
+  const it = getItem(l.itemId); if (!it) return '';
+  const p = priceAt(it, sid), c = cheapest(it);
+  const cheaper = c && p != null && c.p < p && c.sid !== sid;
+  return `<li class="${l.done ? 'done' : ''}">
+    <button class="check" onclick="toggle('${l.id}')" aria-label="Mark as bought">${l.done ? '✓' : ''}</button>
+    <div class="info" onclick="editItem('${it.id}')"><div class="name">${esc(it.name)}</div>
+      <div class="sub">${p != null ? `${money(p)} / ${esc(it.unit)}` : '<span class="warn">no price here</span>'}</div>
+      ${cheaper ? `<div class="sub tip">▼ ${money(c.p)} at ${esc(getStore(c.sid).name)}</div>` : ''}</div>
+    <div class="qtybox"><button onclick="bump('${l.id}',-1)" aria-label="Less">−</button><span onclick="qtySheet('${l.id}')">${fmtQty(l.qty)}</span><button onclick="bump('${l.id}',1)" aria-label="More">+</button></div>
+    <button class="price ${p == null ? 'none' : ''}" onclick="priceSheet('${it.id}','${sid}')">${p != null ? money(p * l.qty) : '+ Price'}</button>
+  </li>`;
+}
+function compareCard(sid) {
+  const rows = S.stores.map(s => ({s, ...totalsAt(s.id)})).sort((a, b) => (a.missing - b.missing) || (a.total - b.total));
+  // A store with missing prices could still turn out cheaper, so only crown a fully-priced store
+  // whose total is at or below every other store's (partial) total.
+  const full = rows.find(r => !r.missing);
+  const best = full && rows.every(r => full.total <= r.total) ? full : null;
+  let split = 0, splitMissing = 0;
+  for (const l of S.list) { const it = getItem(l.itemId); const c = it && cheapest(it); if (c) split += c.p * l.qty; else splitMissing++; }
+  return `<div class="card"><h3>Where is it cheapest?</h3>
+    ${rows.map(r => `<div class="row ${r.s.id === sid ? 'cur' : ''}"><span>${esc(r.s.name)} ${r === best ? '<span class="badge">CHEAPEST</span>' : ''}</span>
+      <b>${money(r.total)}${r.missing ? `<br><span class="warn small">${r.missing} not priced</span>` : ''}</b></div>`).join('')}
+    <div class="row split"><span>Buy each item where it's cheapest</span><b>${money(split)}${splitMissing ? `<br><span class="warn small">${splitMissing} not priced</span>` : ''}</b></div></div>`;
+}
+function addToList(e) {
+  e.preventDefault();
+  const name = $('#addName').value.trim(); if (!name) return;
+  const qty = num($('#addQty').value) || 1;
+  let it = S.items.find(i => i.name.toLowerCase() === name.toLowerCase()), isNew = false;
+  if (!it) { it = {id: uid(), name, unit: 'pc', prices: {}}; S.items.push(it); isNew = true; }
+  const ex = S.list.find(l => l.itemId === it.id);
+  if (ex) { ex.qty += qty; ex.done = false; } else S.list.push({id: uid(), itemId: it.id, qty, done: false});
+  save(); render();
+  if (isNew) editItem(it.id, true);
+  else setTimeout(() => $('#addName') && $('#addName').focus(), 0);
+}
+function toggle(id) { const l = S.list.find(x => x.id === id); l.done = !l.done; save(); render(); }
+function bump(id, dir) {
+  const l = S.list.find(x => x.id === id), it = getItem(l.itemId), st = stepFor(it);
+  const q = Math.round((l.qty + dir * st) * 100) / 100;
+  if (q <= 0) return qtySheet(id);
+  l.qty = q; save(); render();
+}
+function qtySheet(id) {
+  const l = S.list.find(x => x.id === id), it = getItem(l.itemId);
+  sheet(`<h2>${esc(it.name)}</h2><label>Quantity (${esc(it.unit)})</label>
+    <input id="qIn" type="number" inputmode="decimal" step="any" min="0" value="${fmtQty(l.qty)}" data-focus>
+    <div class="btns"><button class="ghost danger" onclick="removeLine('${id}')">Remove from list</button>
+    <button class="btn" onclick="const q=num($('#qIn').value);if(q>0){S.list.find(x=>x.id==='${id}').qty=q;save();closeSheet();render()}">Save</button></div>`);
+}
+function removeLine(id) { S.list = S.list.filter(x => x.id !== id); save(); closeSheet(); render(); }
+function clearDone() {
+  const n = S.list.filter(l => l.done).length;
+  if (!n) return toast('Nothing checked yet');
+  S.list = S.list.filter(l => !l.done); save(); render(); toast(`Removed ${n} item${n > 1 ? 's' : ''}`);
+}
+function uncheckAll() { S.list.forEach(l => l.done = false); save(); render(); }
+
+/* quick price update while in the store */
+function priceSheet(itemId, sid) {
+  const it = getItem(itemId), st = getStore(sid), cur = it.prices && it.prices[sid];
+  sheet(`<h2>${esc(it.name)}</h2><p class="muted small" style="margin-top:-6px">Price per ${esc(it.unit)} at ${esc(st.name)}</p>
+    <input id="pIn" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00" value="${cur ? cur.p : ''}" data-focus>
+    ${cur ? `<p class="small muted">Last set ${niceDate(cur.d)}</p>${historyHtml(cur)}` : ''}
+    <div class="btns"><button class="ghost" onclick="editItem('${itemId}')">Edit item</button>
+    <button class="btn" onclick="savePrice('${itemId}','${sid}')">Save price</button></div>`);
+}
+function savePrice(itemId, sid) {
+  const it = getItem(itemId), v = num($('#pIn').value), old = priceAt(it, sid);
+  if (v == null || v < 0) return toast('Enter a price');
+  setPrice(it, sid, v); save(); closeSheet(); render();
+  if (old != null && v !== old) toast(v > old ? `Up ${money(v - old)} from before` : `Down ${money(old - v)} from before`);
+}
+function historyHtml(entry) {
+  if (!entry || !entry.h || !entry.h.length) return '';
+  const all = entry.h.concat([{p: entry.p, d: entry.d}]);
+  const lines = [];
+  for (let i = all.length - 1; i > 0 && lines.length < 5; i--) {
+    const a = all[i - 1], b = all[i], up = b.p > a.p;
+    lines.push(`<li><span class="${up ? 'up' : 'down'}">${up ? '▲' : '▼'}</span> ${money(a.p)} → ${money(b.p)} <span class="small">(${niceDate(b.d)})</span></li>`);
+  }
+  return `<ul class="hist">${lines.join('')}</ul>`;
+}
+
+/* ---------------- PRICES view ---------------- */
+function viewPrices() {
+  if (!S.stores.length) return empty('No stores yet', 'Add the places you shop, then record prices for each one.', 'Add a store', "go('stores')");
+  return `<div class="toolbar"><input type="search" placeholder="Search items" value="${esc(query)}" oninput="query=this.value;$('#plist').innerHTML=pricesList()">
+    <button class="btn" onclick="editItem()">+ Item</button></div><div id="plist">${pricesList()}</div>`;
+}
+function pricesList() {
+  const q = query.trim().toLowerCase();
+  const items = S.items.filter(i => !q || i.name.toLowerCase().includes(q)).sort((a, b) => a.name.localeCompare(b.name));
+  if (!S.items.length) return `<p class="muted center">No items yet. Tap “+ Item” to record your first price.</p>`;
+  if (!items.length) return `<p class="muted center">No match for “${esc(query)}”.</p>`;
+  return items.map(it => {
+    const c = cheapest(it);
+    const chips = S.stores.map(s => {
+      const e = it.prices && it.prices[s.id]; if (!e) return '';
+      const prev = e.h && e.h.length ? e.h[e.h.length - 1].p : null;
+      const arrow = prev == null ? '' : e.p > prev ? ' <span class="up">▲</span>' : e.p < prev ? ' <span class="down">▼</span>' : '';
+      const best = c && c.sid === s.id && Object.keys(it.prices).length > 1;
+      return `<span class="chip ${best ? 'best' : ''}">${esc(s.name)}: ${money(e.p)}${arrow}</span>`;
+    }).join('');
+    return `<button class="item" onclick="editItem('${it.id}')"><div class="row" style="padding:0"><span class="name">${esc(it.name)}</span><span class="small muted">per ${esc(it.unit)}</span></div>
+      <div class="chips">${chips || '<span class="small warn">No prices yet</span>'}</div></button>`;
+  }).join('');
+}
+function editItem(id, isNew) {
+  const it = id ? getItem(id) : {id: null, name: '', unit: 'pc', prices: {}};
+  const inList = id && S.list.some(l => l.itemId === id);
+  sheet(`<h2>${id && !isNew ? 'Edit item' : 'New item'}</h2>
+    <label>Name</label><input id="eName" value="${esc(it.name)}" placeholder="e.g. Eggs" ${id ? '' : 'data-focus'}>
+    <label>Sold per</label><select id="eUnit">${UNITS.map(u => `<option ${u === it.unit ? 'selected' : ''}>${u}</option>`).join('')}</select>
+    <h3 style="margin-top:18px">Price at each store</h3>
+    ${S.stores.map((s, i) => { const e = it.prices && it.prices[s.id]; return `<div class="prow"><span class="s">${esc(s.name)}</span>
+      <input type="number" inputmode="decimal" step="0.01" min="0" placeholder="—" id="ep_${s.id}" value="${e ? e.p : ''}" ${id && i === 0 ? 'data-focus' : ''}>
+      ${e ? `<div class="d">Updated ${niceDate(e.d)}${historyHtml(e)}</div>` : ''}</div>`; }).join('')}
+    <p class="small muted">Leave a store blank if you don't know the price there.</p>
+    <div class="btns">${id ? `<button class="ghost danger" onclick="deleteItem('${id}')">Delete</button>` : ''}
+      ${id && !inList ? `<button class="ghost" onclick="saveItem('${id}',true)">Save + add to list</button>` : ''}
+      <button class="btn" onclick="saveItem(${id ? `'${id}'` : 'null'})">Save</button></div>`);
+}
+function saveItem(id, addList) {
+  const name = $('#eName').value.trim();
+  if (!name) return toast('Give the item a name');
+  if (S.items.some(i => i.id !== id && i.name.toLowerCase() === name.toLowerCase())) return toast('You already have an item with that name');
+  let it = id ? getItem(id) : null;
+  if (!it) { it = {id: uid(), prices: {}}; S.items.push(it); }
+  it.name = name; it.unit = $('#eUnit').value;
+  for (const s of S.stores) {
+    const raw = $('#ep_' + s.id).value.trim();
+    setPrice(it, s.id, raw === '' ? null : num(raw));
+  }
+  if (addList && !S.list.some(l => l.itemId === it.id)) S.list.push({id: uid(), itemId: it.id, qty: 1, done: false});
+  save(); closeSheet(); render(); toast('Saved');
+}
+function deleteItem(id) {
+  if (!confirm('Delete this item and all its prices?')) return;
+  S.items = S.items.filter(i => i.id !== id); S.list = S.list.filter(l => l.itemId !== id);
+  save(); closeSheet(); render();
+}
+
+/* ---------------- STORES view ---------------- */
+function viewStores() {
+  let h = `<form class="add" onsubmit="addStore(event)"><input id="storeName" placeholder="Store name, e.g. SM Lanang" autocomplete="off"><button class="btn">Add</button></form>`;
+  if (!S.stores.length) return h + `<p class="muted center">Add every place you usually shop so you can compare prices.</p>`;
+  h += `<ul class="list">${S.stores.map(s => {
+    const n = S.items.filter(i => i.prices && i.prices[s.id]).length;
+    return `<li><div class="info"><div class="name">${esc(s.name)}</div><div class="sub">${n} price${n === 1 ? '' : 's'} recorded</div></div>
+      <button class="ghost" onclick="renameStore('${s.id}')">Rename</button></li>`;
+  }).join('')}</ul>`;
+  return h;
+}
+function addStore(e) {
+  e.preventDefault();
+  const name = $('#storeName').value.trim(); if (!name) return;
+  if (S.stores.some(s => s.name.toLowerCase() === name.toLowerCase())) return toast('That store is already added');
+  S.stores.push({id: uid(), name}); activeStore(); save(); render(); toast('Store added');
+}
+function renameStore(id) {
+  const s = getStore(id);
+  sheet(`<h2>Store</h2><label>Name</label><input id="sName" value="${esc(s.name)}" data-focus>
+    <div class="btns"><button class="ghost danger" onclick="deleteStore('${id}')">Delete store</button>
+    <button class="btn" onclick="const v=$('#sName').value.trim();if(v){getStore('${id}').name=v;save();closeSheet();render()}">Save</button></div>`);
+}
+function deleteStore(id) {
+  if (!confirm('Delete this store and every price recorded for it?')) return;
+  S.stores = S.stores.filter(s => s.id !== id);
+  S.items.forEach(i => { if (i.prices) delete i.prices[id]; });
+  save(); closeSheet(); render();
+}
+
+/* ---------------- SETTINGS view ---------------- */
+function viewSettings() {
+  const standalone = window.navigator.standalone || matchMedia('(display-mode: standalone)').matches;
+  const offlineReady = 'serviceWorker' in navigator && navigator.serviceWorker.controller;
+  return `<div class="card"><h3>Budget per trip</h3>
+      <input type="number" inputmode="decimal" min="0" step="1" placeholder="e.g. 1000" value="${S.settings.budget || ''}"
+        onchange="S.settings.budget=Math.max(0,num(this.value)||0);save();toast('Budget saved')">
+      <p class="small muted">The List tab warns you when your total gets close to this.</p></div>
+    <div class="card"><h3>Backup</h3>
+      <p class="small muted" style="margin-top:0">Your data lives only on this phone. Save a backup now and then (e.g. to Files or Google Drive).<br>Last backup: <b>${S.settings.lastBackup ? niceDate(S.settings.lastBackup) : 'never'}</b></p>
+      <div class="btns" style="margin-top:8px"><button class="btn" onclick="exportData()">Save backup</button>
+      <button class="ghost" onclick="$('#imp').click()">Restore backup</button></div>
+      <input id="imp" type="file" accept="application/json,.json" hidden onchange="importData(this.files[0])"></div>
+    <div class="card"><h3>Status</h3>
+      <div class="row"><span>Works offline</span><b class="${offlineReady ? 'good' : 'warn'}">${offlineReady ? 'Ready' : 'Open once online'}</b></div>
+      <div class="row"><span>Installed on Home Screen</span><b class="${standalone ? 'good' : 'warn'}">${standalone ? 'Yes' : 'Not yet'}</b></div>
+      ${standalone ? '' : `<p class="small muted">In Safari, tap the Share button, then “Add to Home Screen”. Use the Home Screen icon from then on — it keeps its own saved data.</p>`}
+      <div class="row"><span>Items / Stores</span><b>${S.items.length} / ${S.stores.length}</b></div></div>
+    <div class="card"><h3>Danger zone</h3><button class="ghost danger" onclick="resetAll()">Erase all data</button></div>
+    <p class="center small muted">Budget Basket v1</p>`;
+}
+async function exportData() {
+  S.settings.lastBackup = today(); save();
+  const name = `budget-basket-${today()}.json`;
+  const blob = new Blob([JSON.stringify(S, null, 1)], {type: 'application/json'});
+  try {
+    const file = new File([blob], name, {type: 'application/json'});
+    if (navigator.canShare && navigator.canShare({files: [file]})) { await navigator.share({files: [file], title: 'Budget Basket backup'}); render(); return; }
+  } catch (e) { if (e.name === 'AbortError') return; }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+  render();
+}
+function importData(file) {
+  if (!file) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const d = JSON.parse(r.result);
+      if (!d || !Array.isArray(d.items) || !Array.isArray(d.stores)) throw 0;
+      if (!confirm(`Replace everything here with this backup? (${d.items.length} items, ${d.stores.length} stores)`)) return;
+      const b = blank(); S = {...b, ...d, settings: {...b.settings, ...(d.settings || {})}}; save(); render(); toast('Backup restored');
+    } catch (e) { toast('That file is not a Budget Basket backup'); }
+  };
+  r.readAsText(file);
+}
+function resetAll() {
+  if (!confirm('Erase all stores, prices and your list? This cannot be undone.')) return;
+  S = blank(); save(); go('list');
+}
+
+const VIEWS = {list: viewList, prices: viewPrices, stores: viewStores, settings: viewSettings};
+
+/* ---------------- boot ---------------- */
+window.addEventListener('online', render);
+window.addEventListener('offline', render);
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (tab === 'settings') render(); });
+}
+if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+render();
+</script>
+</body>
+</html>
